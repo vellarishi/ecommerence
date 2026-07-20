@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Ruchi</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .form-error {
+    display: none;
+    background: #fbeae2;
+    color: #b04a2c;
+    font-size: .85rem;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .field.invalid input { border-color: #b04a2c !important; }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="index.html" class="logo">Ru<span>chi</span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="restaurants.html">Restaurants</a>
+      <a href="orders.html">Orders</a>
+      <a href="favorites.html">Favorites</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="cart.html" class="icon-btn" aria-label="Cart">🛒<span class="badge" data-cart-count>0</span></a>
+      <a href="register.html" class="btn btn-dark btn-sm">Sign Up</a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu"><span></span></button>
+  </div>
+</header>
+
+<main class="auth-wrap">
+  <div class="auth-art">
+    <div class="auth-art-content">
+      <h2>Hungry already?</h2>
+      <p>Log in to pick up right where you left off — saved addresses, favorites and your last order, one tap away.</p>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-box">
+      <span class="eyebrow">Welcome back</span>
+      <h1>Login to Ruchi</h1>
+      <p>Enter your details to continue ordering.</p>
+
+      <form id="loginForm" novalidate>
+        <div class="form-error" id="formError"></div>
+
+        <div class="field" id="emailField">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+          <span class="error-msg">Enter a valid email address</span>
+        </div>
+
+        <div class="field" id="passField">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="••••••••" required>
+            <button type="button" class="toggle-pass">Show</button>
+          </div>
+          <span class="error-msg">Password must be at least 6 characters</span>
+        </div>
+
+        <div class="field-row">
+          <label class="checkbox-row">
+            <input type="checkbox" id="remember">
+            Remember me
+          </label>
+          <a href="#" class="btn-ghost" style="font-size:.85rem;">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Login</button>
+      </form>
+
+      <div class="divider">or</div>
+      <button class="btn btn-outline btn-block">Continue with Google</button>
+
+      <p class="auth-switch">Don't have an account? <a href="register.html">Register</a></p>
+    </div>
+  </div>
+</main>
+
+<script>
+  const API_BASE = "http://127.0.0.1:5000/api";
+
+  // Ensure error messages start hidden regardless of what style.css does —
+  // JS-driven display avoids relying on an unknown CSS convention.
+  document.querySelectorAll(".error-msg").forEach(el => el.style.display = "none");
+
+  function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const errorEl = field.querySelector(".error-msg");
+    if (errorEl) {
+      if (message) errorEl.textContent = message;
+      errorEl.style.display = "block";
+    }
+    field.classList.add("invalid");
+  }
+
+  function clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    const errorEl = field.querySelector(".error-msg");
+    if (errorEl) errorEl.style.display = "none";
+    field.classList.remove("invalid");
+  }
+
+  function showFormError(message) {
+    const el = document.getElementById("formError");
+    el.textContent = message;
+    el.style.display = "block";
+  }
+
+  function clearFormError() {
+    document.getElementById("formError").style.display = "none";
+  }
+
+  // Show/hide password toggle buttons
+  document.querySelectorAll(".toggle-pass").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const input = this.previousElementSibling;
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+      this.textContent = isHidden ? "Hide" : "Show";
+    });
+  });
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  document.getElementById("loginForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    clearFormError();
+    clearFieldError("emailField");
+    clearFieldError("passField");
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    let hasError = false;
+    if (!EMAIL_RE.test(email)) {
+      showFieldError("emailField");
+      hasError = true;
+    }
+    if (!password) {
+      showFieldError("passField", "Please enter your password");
+      hasError = true;
+    }
+    if (hasError) return;
+
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    btn.textContent = "Logging in…";
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showFormError(data.error || "Login failed. Please try again.");
+        btn.disabled = false;
+        btn.textContent = "Login";
+        return;
+      }
+
+      // Store the session — used by cart.html (auto-fill checkout),
+      // orders.html (auto-load "my orders"), and any page that wants
+      // to greet the logged-in customer.
+      localStorage.setItem("ruchiToken", data.token);
+      localStorage.setItem("ruchiCustomer", JSON.stringify(data.customer));
+      if (data.customer.phone) {
+        localStorage.setItem("ruchiPhone", data.customer.phone);
+      }
+
+      window.location.href = "index.html";
+    } catch (err) {
+      console.error("Login error:", err);
+      showFormError(`Couldn't reach the server — is the backend running? (${err.message})`);
+      btn.disabled = false;
+      btn.textContent = "Login";
+    }
+  });
+</script>
+
+<script src="js/script.js"></script>
+<script src="js/navbar.js"></script>
+</body>
+</body>
+</html>

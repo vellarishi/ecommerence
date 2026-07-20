@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruchi — Real Food, Real Fast</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header class="navbar">
+  <div class="container">
+    <a href="index.html" class="logo">Ru<span>chi</span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="restaurants.html">Restaurants</a>
+      <a href="restaurants.html">cart</a>
+      <a href="orders.html">Orders</a>
+      <a href="favorites.html">Favorites</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="favorites.html" class="icon-btn" aria-label="Favorites">♡</a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart">
+        🛒<span class="badge" data-cart-count>0</span>
+      </a>
+      <a href="login.html" class="btn btn-dark btn-sm">Login</a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu"><span></span></button>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Delivering across Salem &amp; beyond</span>
+      <h1>Food that feels like <em>home</em>, at your door.</h1>
+      <p class="lead">From steaming filter kaapi to sizzling biryani — order from 500+ restaurants and get it delivered hot, fast, and fuss-free.</p>
+
+      <div class="search-bar">
+        <span style="padding-left:10px;">📍</span>
+        <input type="text" placeholder="Search restaurants, cuisines or dishes…">
+        <button class="btn btn-primary">Search</button>
+      </div>
+
+      <div class="hero-cta">
+        <a href="restaurants.html" class="btn btn-primary">Order Now →</a>
+        <a href="about.html" class="btn btn-outline">How it works</a>
+      </div>
+
+      <div class="hero-stats">
+        <div><strong>500+</strong><span>Restaurant partners</span></div>
+        <div><strong>25 min</strong><span>Avg. delivery time</span></div>
+        <div><strong>4.7★</strong><span>Customer rating</span></div>
+      </div>
+    </div>
+
+    <div class="hero-art">
+      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80" alt="Assorted Indian food spread">
+      <div class="hero-float f1">🔥 Trending: Chettinad Biryani</div>
+      <div class="hero-float f2">✅ Order #4821 delivered in 22 min</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CATEGORIES ================= -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Browse</span>
+      <h2>What are you craving today?</h2>
+    </div>
+    <div class="cat-scroll grid-4" id="categoryGrid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;"></div>
+  </div>
+</section>
+
+<!-- ================= POPULAR DISHES ================= -->
+<section class="section" style="background:var(--surface-warm); padding:88px 0;">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Loved by everyone</span>
+      <h2>Popular dishes near you</h2>
+      <p>The most-ordered plates this week, picked by your neighbourhood.</p>
+    </div>
+    <div class="grid grid-4" id="dishGrid"></div>
+  </div>
+</section>
+
+<!-- ================= FEATURED RESTAURANTS ================= -->
+<section class="section">
+  <div class="container">
+    <div class="section-head" style="display:flex; align-items:flex-end; justify-content:space-between; max-width:none;">
+      <div>
+        <span class="eyebrow">Handpicked</span>
+        <h2>Featured restaurants</h2>
+      </div>
+      <a href="restaurants.html" class="btn-ghost">View all →</a>
+    </div>
+    <div class="grid grid-4" id="featuredGrid"></div>
+  </div>
+</section>
+
+<!-- ================= WHY CHOOSE US ================= -->
+<section class="section" style="background:var(--ink); border-radius:var(--radius-lg); max-width:1200px; margin:0 auto; padding:70px 50px; color:#fff;">
+  <div class="section-head center" style="margin-bottom:50px;">
+    <span class="eyebrow" style="color:var(--accent);">Why Ruchi</span>
+    <h2 style="color:#fff;">Built for people who love food</h2>
+  </div>
+  <div class="why-grid">
+    <div class="why-item">
+      <div class="ico">⚡</div>
+      <h3 style="color:#fff;">Lightning delivery</h3>
+      <p style="color:#B9AE9B;">Average 25-minute delivery with live order tracking.</p>
+    </div>
+    <div class="why-item">
+      <div class="ico">🛡️</div>
+      <h3 style="color:#fff;">Hygiene assured</h3>
+      <p style="color:#B9AE9B;">Every partner restaurant is verified for food safety.</p>
+    </div>
+    <div class="why-item">
+      <div class="ico">💰</div>
+      <h3 style="color:#fff;">Best-price promise</h3>
+      <p style="color:#B9AE9B;">No hidden markups — same price as dining in.</p>
+    </div>
+    <div class="why-item">
+      <div class="ico">💬</div>
+      <h3 style="color:#fff;">24/7 support</h3>
+      <p style="color:#B9AE9B;">Real help, day or night, whenever something's off.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TESTIMONIALS ================= -->
+<section class="section">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Testimonials</span>
+      <h2>What our customers say</h2>
+    </div>
+    <div class="testi-track">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">"Ordered biryani at 11pm on a weekday and it showed up in 20 minutes, still hot. Ruchi is now my default."</p>
+        <div class="testi-person">
+          <img src="https://i.pravatar.cc/80?img=12" alt="Customer">
+          <div><strong>Priya Ramesh</strong><span>Salem</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">"The filter kaapi from Madras Filter Kaapi tastes exactly like my grandmother's. Never going back to instant coffee."</p>
+        <div class="testi-person">
+          <img src="https://i.pravatar.cc/80?img=32" alt="Customer">
+          <div><strong>Arjun Kumar</strong><span>Coimbatore</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★☆</div>
+        <p class="quote">"Great variety and the support chat actually resolved my refund in minutes. Rare to see that these days."</p>
+        <div class="testi-person">
+          <img src="https://i.pravatar.cc/80?img=47" alt="Customer">
+          <div><strong>Divya S.</strong><span>Chennai</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="container">
+    <div>
+      <a href="index.html" class="logo">Ru<span>chi</span></a>
+      <p>Real food, real fast — delivering the flavours of home across Tamil Nadu and beyond.</p>
+      <div class="social-row">
+        <a href="#">f</a><a href="#">in</a><a href="#">ig</a>
+      </div>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="#">Careers</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>For You</h4>
+      <ul>
+        <li><a href="restaurants.html">Restaurants</a></li>
+        <li><a href="orders.html">Track Order</a></li>
+        <li><a href="favorites.html">Favorites</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Get in touch</h4>
+      <ul>
+        <li><a href="mailto:hello@ruchi.app">hello@ruchi.app</a></li>
+        <li><a href="tel:+919876543210">+91 98765 43210</a></li>
+        <li>Salem, Tamil Nadu</li>
+      </ul>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© 2026 Ruchi Foods Pvt. Ltd. All rights reserved.</span>
+    <span>Made with ❤️ in Tamil Nadu</span>
+  </div>
+</footer>
+<script src="js/script.js"></script>
+<script src="js/chatbot.js"></script>
+<script src="js/navbar.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <h1>Dashboard</h1>
+  <span class="user-tag">Logged in as {{ current_user.username }}</span>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="label">Active Products</div>
+    <div class="value">{{ stats.product_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Total Orders</div>
+    <div class="value">{{ stats.order_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Pending Orders</div>
+    <div class="value">{{ stats.pending_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Total Revenue</div>
+    <div class="value">₹{{ stats.revenue }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">Recent Orders</h3>
+  {% if recent_orders %}
+  <table>
+    <thead>
+      <tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for order in recent_orders %}
+      <tr>
+        <td>#{{ order.id }}</td>
+        <td>{{ order.customer_name }}</td>
+        <td>₹{{ order.total }}</td>
+        <td><span class="pill {{ order.status.replace(' ', '-') }}">{{ order.status }}</span></td>
+        <td>{{ order.created_at.strftime('%d %b, %I:%M %p') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--ink-soft);">No orders yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="navbar">
+  <div class="container">
+    <a href="index.html" class="logo">Ru<span>chi</span></a>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="restaurants.html">Restaurants</a></li>
+      <li><a href="cart.html">Cart</a></li>
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="favorites.html">Favorites</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <a href="favorites.html" class="icon-btn" aria-label="Favorites">♡</a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart">
+        🛒<span class="badge" data-cart-count>0</span>
+      </a>
+      <a href="login.html" class="btn btn-dark btn-sm">Login</a>
+    </div>
+
+    <button class="nav-toggle" aria-label="Menu"><span></span></button>
+  </div>
+</header>
+
+  <!-- Hero: intro + branded image -->
+  <section class="hero" style="padding-bottom:20px;">
+    <div class="container" style="display:grid; grid-template-columns:1.1fr 1fr; gap:48px; align-items:center;">
+      <div>
+        <span class="eyebrow">Our Story</span>
+        <h1 style="margin-top:14px;">Good food, <em style="font-style:italic; color:#c0521f;">delivered with care.</em></h1>
+        <p class="lead" style="margin-top:18px;">
+          RUCHI connects hungry customers with the best local restaurants in town —
+          South Indian, Italian, Chinese, and everything in between. We started with
+          one simple idea: great food shouldn't take forever to reach your door.
+        </p>
+      </div>
+      <div class="hero-art" id="aboutHeroArt"></div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="section" style="padding-top:40px;">
+    <div class="container">
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px;">
+        <div style="background:#ffffff; border:1px solid #f0e6d8; border-radius:14px; padding:24px; box-shadow:0 2px 10px rgba(43,36,32,0.05); text-align:center;">
+          <div style="font-family:Georgia, serif; font-size:2.2rem; font-weight:700; color:#c0521f;">250+</div>
+          <div style="font-size:.85rem; color:#8a7d6c; margin-top:6px;">Partner Restaurants</div>
+        </div>
+        <div style="background:#ffffff; border:1px solid #f0e6d8; border-radius:14px; padding:24px; box-shadow:0 2px 10px rgba(43,36,32,0.05); text-align:center;">
+          <div style="font-family:Georgia, serif; font-size:2.2rem; font-weight:700; color:#c0521f;">50K+</div>
+          <div style="font-size:.85rem; color:#8a7d6c; margin-top:6px;">Happy Customers</div>
+        </div>
+        <div style="background:#ffffff; border:1px solid #f0e6d8; border-radius:14px; padding:24px; box-shadow:0 2px 10px rgba(43,36,32,0.05); text-align:center;">
+          <div style="font-family:Georgia, serif; font-size:2.2rem; font-weight:700; color:#c0521f;">30 min</div>
+          <div style="font-size:.85rem; color:#8a7d6c; margin-top:6px;">Average Delivery</div>
+        </div>
+        <div style="background:#ffffff; border:1px solid #f0e6d8; border-radius:14px; padding:24px; box-shadow:0 2px 10px rgba(43,36,32,0.05); text-align:center;">
+          <div style="font-family:Georgia, serif; font-size:2.2rem; font-weight:700; color:#c0521f;">15</div>
+          <div style="font-size:.85rem; color:#8a7d6c; margin-top:6px;">Cities Served</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why choose us -->
+  <section class="section" style="background:#f7f0e3;">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow" style="justify-content:center;">Why RUCHI</span>
+        <h2>What makes us different</h2>
+      </div>
+      <div class="why-grid">
+        <div class="why-item">
+          <div class="ico">⚡</div>
+          <h3>Fast Delivery</h3>
+          <p>Most orders reach you in under 35 minutes, hot and fresh.</p>
+        </div>
+        <div class="why-item">
+          <div class="ico">🍴</div>
+          <h3>Curated Restaurants</h3>
+          <p>Every partner is hand-picked for quality and hygiene.</p>
+        </div>
+        <div class="why-item">
+          <div class="ico">💳</div>
+          <h3>Easy Payments</h3>
+          <p>Pay however you like — card, UPI, wallet, or cash on delivery.</p>
+        </div>
+        <div class="why-item">
+          <div class="ico">📍</div>
+          <h3>Live Tracking</h3>
+          <p>Watch your order move from kitchen to doorstep in real time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission -->
+  <section class="section">
+    <div class="container" style="max-width:760px;">
+      <h2>Our mission</h2>
+      <p style="margin-top:16px; color:#5a5148; font-size:1.05rem; line-height:1.8;">
+        We believe ordering food online should feel effortless. That's why we
+        obsess over three things: speed, reliability, and the quality of every
+        restaurant we bring onto our platform. Whether it's a quick weekday lunch
+        or a weekend celebration, RUCHI is built to get great food to you —
+        fast, fresh, and without the hassle.
+      </p>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section" style="background:#f7f0e3;">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow" style="justify-content:center;">Testimonials</span>
+        <h2>What our customers say</h2>
+      </div>
+      <div class="testi-track">
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"Fastest delivery I've ever used. Food always arrives hot and the app is so easy to use."</p>
+          <div class="testi-person">
+            <div style="width:44px;height:44px;border-radius:50%;background:#fdeee0;color:#c0521f;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:Georgia, serif;">AK</div>
+            <div>
+              <strong>Arun Kumar</strong>
+              <span>Chennai</span>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"Love the variety of restaurants. Found so many hidden gems I never knew existed nearby."</p>
+          <div class="testi-person">
+            <div style="width:44px;height:44px;border-radius:50%;background:#e5f5ea;color:#1f8b4c;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:Georgia, serif;">PS</div>
+            <div>
+              <strong>Priya Sharma</strong>
+              <span>Salem</span>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"Live tracking is a game changer. I always know exactly when to expect my order."</p>
+          <div class="testi-person">
+            <div style="width:44px;height:44px;border-radius:50%;background:#fff4e0;color:#c07d10;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:Georgia, serif;">RS</div>
+            <div>
+              <strong>Ravi Shankar</strong>
+              <span>Coimbatore</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Branded hero graphic — inline SVG, no internet dependency
+    const heroSvg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="560" height="420" viewBox="0 0 560 420">
+        <defs>
+          <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#C4491D"/>
+            <stop offset="100%" stop-color="#96350F"/>
+          </linearGradient>
+          <pattern id="heroDots" width="30" height="30" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1.6" fill="#ffffff" fill-opacity="0.14"/>
+          </pattern>
+        </defs>
+        <rect width="560" height="420" rx="28" fill="url(#heroGrad)"/>
+        <rect width="560" height="420" rx="28" fill="url(#heroDots)"/>
+        <circle cx="280" cy="185" r="95" fill="#ffffff" fill-opacity="0.95"/>
+        <text x="280" y="185" font-size="100" text-anchor="middle" dominant-baseline="central">🍛</text>
+        <text x="280" y="325" font-family="Georgia, serif" font-size="30" font-weight="700"
+              text-anchor="middle" fill="#ffffff">RUCHI</text>
+        <text x="280" y="356" font-family="Arial, sans-serif" font-size="14" letter-spacing="3"
+              text-anchor="middle" fill="#ffffff" fill-opacity="0.85">FOOD DELIVERY</text>
+      </svg>`;
+    document.getElementById("aboutHeroArt").innerHTML = heroSvg;
+  </script>
+
+  <script src="js/script.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/chatbot.js"></script>
+</body>
+</body>
+</html>

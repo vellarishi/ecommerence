@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <h1>Orders</h1>
+</div>
+
+<div style="margin-bottom:18px; display:flex; gap:8px; flex-wrap:wrap;">
+  {% for s in ['all', 'Placed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'] %}
+    <a href="{{ url_for('admin.orders', status=s) }}"
+       class="btn btn-sm {{ 'btn-primary' if status_filter == s else 'btn-outline' }}">{{ s|capitalize if s == 'all' else s }}</a>
+  {% endfor %}
+</div>
+
+<div class="card">
+  {% if orders %}
+  <table>
+    <thead>
+      <tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>#{{ order.id }}</td>
+        <td>
+          {{ order.customer_name }}<br>
+          <span style="color:var(--ink-soft); font-size:.82rem;">{{ order.customer_phone }}</span>
+        </td>
+        <td style="font-size:.85rem; color:var(--ink-soft);">
+          {% for item in order.items %}{{ item.product_name }} ×{{ item.quantity }}{% if not loop.last %}, {% endif %}{% endfor %}
+        </td>
+        <td>₹{{ order.total }}</td>
+        <td><span class="pill {{ order.status.replace(' ', '-') }}">{{ order.status }}</span></td>
+        <td style="font-size:.85rem;">{{ order.created_at.strftime('%d %b, %I:%M %p') }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}" style="display:flex; gap:6px;">
+            <select name="status" style="padding:6px 10px; border-radius:8px; border:1px solid var(--line); font-size:.82rem;">
+              {% for s in ['Placed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'] %}
+                <option value="{{ s }}" {{ 'selected' if order.status == s else '' }}>{{ s }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-outline btn-sm">Update</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--ink-soft);">No orders found.</p>
+  {% endif %}
+</div>
+{% endblock %}

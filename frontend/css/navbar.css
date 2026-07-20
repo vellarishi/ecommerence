@@ -1,0 +1,133 @@
+/* ===== RESET (idhu miss pannalana center break aagum) ===== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.navbar ul {
+  list-style: none;   /* browser default bullet remove */
+  margin: 0;           /* browser default margin remove */
+  padding: 0;           /* browser default padding remove */
+}
+
+/* ===== NAVBAR CONTAINER ===== */
+.navbar {
+  width: 100%;                      /* IMPORTANT: full width edukkanum */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   /* left, center, right zones */
+  padding: 18px 48px;
+  background-color: #f7f0e3;
+  position: relative;               /* center group ku reference point */
+}
+
+/* ===== LEFT: LOGO ===== */
+.navbar-left {
+  flex-shrink: 0;                   /* logo width matter la nav shrink aagakoodathu */
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+  text-decoration: none;
+  color: #2b2b2b;
+  font-family: Georgia, serif;
+}
+
+.logo-accent {
+  color: #c0521f;
+}
+
+/* ===== CENTER: NAV LINKS =====
+   Idhu thaan main trick: position absolute + left:50% + translateX(-50%)
+   Idhu use pannina, logo width ya icons width edhu maarina,
+   nav links EXACT center la than irukkum — every page layum guaranteed. */
+.navbar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #4a4038;
+  font-weight: 600;
+  font-size: 16px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: #c0521f;
+}
+
+/* Current page ku underline (JS mூலம் automatic ah add aagum) */
+.nav-links a.active {
+  color: #c0521f;
+  border-bottom-color: #c0521f;
+}
+
+/* ===== RIGHT: ICONS + LOGIN ===== */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #d9772e;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-btn {
+  background: #2b2420;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .navbar-center {
+    display: none;   /* Mobile la hamburger menu use pannunga - separate topic */
+  }
+}

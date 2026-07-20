@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Cart — RUCHI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .cart-page-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .cart-page-head h1 { margin: 0; }
+    .cart-count-tag {
+      font-size: .95rem;
+      color: var(--ink-soft, #7a7166);
+      font-weight: 600;
+    }
+    .cart-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 40px;
+      align-items: start;
+      margin-top: 28px;
+    }
+    @media (max-width: 860px) {
+      .cart-layout { grid-template-columns: 1fr; }
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: #fff;
+      border: 1px solid var(--line, #f0e6d8);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: box-shadow .15s ease, transform .15s ease;
+    }
+    .cart-item:hover {
+      box-shadow: 0 6px 20px rgba(43,36,32,.06);
+      transform: translateY(-1px);
+    }
+    .cart-item img {
+      width: 84px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 10px;
+      flex-shrink: 0;
+      background: var(--surface-warm, #f7f0e3);
+    }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-info h3 {
+      font-size: 1.05rem;
+      margin: 0 0 4px;
+      color: var(--ink, #2b2420);
+    }
+    .cart-item-meta {
+      font-size: .85rem;
+      color: var(--ink-soft, #8a8071);
+      margin: 0;
+    }
+    .cart-item-side { text-align: right; flex-shrink: 0; }
+    .cart-item-price {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent, #c0521f);
+      margin: 0 0 10px;
+    }
+    .remove-item {
+      border: none;
+      background: none;
+      color: #b04a2c;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background .15s ease;
+    }
+    .remove-item:hover { background: #fbeae2; }
+    .empty-state {
+      text-align: center;
+      padding: 70px 20px;
+      background: #fff;
+      border: 1px dashed var(--line, #e6dcc8);
+      border-radius: 16px;
+    }
+    .empty-state .emoji { font-size: 3rem; margin-bottom: 14px; }
+    .empty-state h3 { margin: 0 0 8px; font-size: 1.3rem; }
+    .empty-state p { color: var(--ink-soft, #8a8071); margin: 0; }
+    .empty-state a { color: var(--accent, #c0521f); font-weight: 600; text-decoration: none; }
+    .empty-state a:hover { text-decoration: underline; }
+    .cart-summary-card {
+      background: #fff;
+      border: 1px solid var(--line, #f0e6d8);
+      border-radius: 16px;
+      padding: 26px;
+      position: sticky;
+      top: 20px;
+    }
+    .cart-summary-card h3 { margin: 0 0 18px; font-size: 1.1rem; }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .95rem;
+      color: var(--ink-soft, #6f665a);
+      margin-bottom: 12px;
+    }
+    .summary-row.total {
+      border-top: 1px solid var(--line, #f0e6d8);
+      margin-top: 14px;
+      padding-top: 14px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--ink, #2b2420);
+    }
+    .btn-block {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+      font-size: 1rem;
+      border-radius: 30px;
+    }
+    .checkout-form {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line, #f0e6d8);
+    }
+    .checkout-form label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: var(--ink, #2b2420);
+    }
+    .checkout-form input,
+    .checkout-form textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--line, #f0e6d8);
+      border-radius: 8px;
+      font-size: .9rem;
+      font-family: inherit;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+    .checkout-form textarea { resize: vertical; min-height: 60px; }
+    .form-error {
+      color: #b04a2c;
+      font-size: .82rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">Ru<span>chi</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="restaurants.html">Restaurants</a></li>
+        <li><a href="cart.html" class="active">Cart</a></li>
+        <li><a href="orders.html">Orders</a></li>
+        <li><a href="favorites.html">Favorites</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="favorites.html" class="icon-btn">♥</a>
+        <a href="cart.html" class="icon-btn">
+          🛒<span class="badge" id="cartCount">0</span>
+        </a>
+        <a href="login.html" class="btn btn-dark btn-sm">Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container section">
+    <div class="cart-page-head">
+      <h1>My Cart</h1>
+      <span class="cart-count-tag" id="cartCountTag"></span>
+    </div>
+
+    <div class="cart-layout">
+      <div id="cartList"></div>
+
+      <aside class="cart-summary-card" id="cartSummary">
+        <h3>Order Summary</h3>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>₹<span id="cartTotal">0</span></span>
+        </div>
+        <div class="summary-row">
+          <span>Delivery Fee</span>
+          <span>Free</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>₹<span id="cartTotalDisplay">0</span></span>
+        </div>
+
+        <div class="checkout-form">
+          <label for="customerName">Full Name</label>
+          <input type="text" id="customerName" placeholder="Your name">
+
+          <label for="customerPhone">Phone Number</label>
+          <input type="tel" id="customerPhone" placeholder="10-digit mobile number">
+
+          <label for="customerAddress">Delivery Address</label>
+          <textarea id="customerAddress" placeholder="House no, street, area, city"></textarea>
+
+          <div class="form-error" id="checkoutError"></div>
+        </div>
+
+        <button id="checkoutBtn" class="btn btn-primary btn-block">Place Order</button>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:5000/api";
+
+    function getCart() {
+      return JSON.parse(localStorage.getItem("cart")) || [];
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    function updateCartCount() {
+      const el = document.getElementById("cartCount");
+      if (el) el.textContent = getCart().length;
+
+      const tag = document.getElementById("cartCountTag");
+      if (tag) {
+        const n = getCart().length;
+        tag.textContent = n === 0 ? "" : `${n} item${n > 1 ? "s" : ""}`;
+      }
+    }
+
+    function updateCartTotal() {
+      const total = getCart().reduce((sum, item) => sum + (item.priceValue || 0), 0);
+      document.getElementById("cartTotal").textContent = total;
+      document.getElementById("cartTotalDisplay").textContent = total;
+    }
+
+    function renderCart() {
+      const container = document.getElementById("cartList");
+      const cart = getCart();
+
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="emoji">🛒</div>
+            <h3>Your cart is empty</h3>
+            <p>Add something from <a href="restaurants.html">restaurants</a>!</p>
+          </div>`;
+        updateCartTotal();
+        return;
+      }
+
+      container.innerHTML = cart.map((item, index) => `
+        <div class="cart-item">
+          <img src="${item.image || 'https://via.placeholder.com/90x90?text=🍽️'}" alt="${item.name}">
+          <div class="cart-item-info">
+            <h3>${item.name}</h3>
+            <p class="cart-item-meta">${item.cuisine || ""}${item.deliveryTime ? " • " + item.deliveryTime : ""}</p>
+          </div>
+          <div class="cart-item-side">
+            <p class="cart-item-price">₹${item.priceValue || 0}</p>
+            <button class="remove-item" data-index="${index}">Remove</button>
+          </div>
+        </div>
+      `).join("");
+
+      updateCartTotal();
+
+      document.querySelectorAll(".remove-item").forEach(btn => {
+        btn.addEventListener("click", function () {
+          const index = parseInt(this.getAttribute("data-index"));
+          const cart = getCart();
+          cart.splice(index, 1);
+          saveCart(cart);
+          updateCartCount();
+          renderCart();
+        });
+      });
+    }
+
+    function buildOrderItems(cart) {
+      const counts = {};
+      cart.forEach(item => {
+        counts[item.id] = (counts[item.id] || 0) + 1;
+      });
+      return Object.keys(counts).map(id => ({
+        productId: parseInt(id),
+        quantity: counts[id]
+      }));
+    }
+
+    function showCheckoutError(message) {
+      const el = document.getElementById("checkoutError");
+      el.textContent = message;
+      el.style.display = "block";
+    }
+
+    function clearCheckoutError() {
+      const el = document.getElementById("checkoutError");
+      el.style.display = "none";
+    }
+
+    document.getElementById("checkoutBtn").addEventListener("click", async function () {
+      clearCheckoutError();
+
+      const cart = getCart();
+      if (cart.length === 0) {
+        showCheckoutError("Your cart is empty. Add something first!");
+        return;
+      }
+
+      const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
+      const address = document.getElementById("customerAddress").value.trim();
+
+      if (!name || !phone || !address) {
+        showCheckoutError("Please fill in your name, phone and address.");
+        return;
+      }
+
+      const btn = this;
+      btn.disabled = true;
+      btn.textContent = "Placing order…";
+
+      try {
+        const res = await fetch(`${API_BASE}/orders`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerName: name,
+            customerPhone: phone,
+            address: address,
+            items: buildOrderItems(cart)
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Server responded ${res.status}`);
+        }
+
+        const order = await res.json();
+
+        localStorage.setItem("ruchiPhone", phone);
+
+        saveCart([]);
+        updateCartCount();
+
+        window.location.href = `orders.html`;
+      } catch (err) {
+        console.error("Checkout failed:", err);
+        showCheckoutError(`Couldn't place order — is the backend server running? (${err.message})`);
+        btn.disabled = false;
+        btn.textContent = "Place Order";
+      }
+    });
+
+    updateCartCount();
+    renderCart();
+  </script>
+<script src="js/navbar.js"></script>
+<script src="js/chatbot.js"></script>
+</body>
+</body>
+</html>
