@@ -2,6 +2,11 @@ import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+# instance/ is gitignored (holds the SQLite file), so a fresh checkout
+# (e.g. Render's build) won't have it — SQLite can't create the db file
+# in a directory that doesn't exist yet, so we create it here.
+os.makedirs(os.path.join(BASE_DIR, "instance"), exist_ok=True)
+
 
 class Config:
     # SECRET_KEY signs the session cookie (used for admin login sessions).
