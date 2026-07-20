@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — Ruchi</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .form-error {
+    display: none;
+    background: #fbeae2;
+    color: #b04a2c;
+    font-size: .85rem;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .field.invalid input { border-color: #b04a2c !important; }
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="index.html" class="logo">Ru<span>chi</span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="restaurants.html">Restaurants</a>
+      <a href="orders.html">Orders</a>
+      <a href="favorites.html">Favorites</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="cart.html" class="icon-btn" aria-label="Cart">🛒<span class="badge" data-cart-count>0</span></a>
+      <a href="login.html" class="btn btn-dark btn-sm">Login</a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu"><span></span></button>
+  </div>
+</header>
+
+<main class="auth-wrap">
+  <div class="auth-art">
+    <div class="auth-art-content">
+      <h2>Join Ruchi today</h2>
+      <p>Create an account to unlock exclusive deals, faster checkout, and order history — all in one place.</p>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-box">
+      <span class="eyebrow">Get started</span>
+      <h1>Create an account</h1>
+      <p>Takes less than a minute.</p>
+
+      <form id="registerForm" novalidate>
+        <div class="form-error" id="formError"></div>
+
+        <div class="field" id="nameField">
+          <label for="name">Full name</label>
+          <input type="text" id="name" placeholder="Your full name" required>
+          <span class="error-msg">Enter your full name</span>
+        </div>
+
+        <div class="field" id="emailField">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+          <span class="error-msg">Enter a valid email address</span>
+        </div>
+
+        <div class="field" id="mobileField">
+          <label for="mobile">Mobile number</label>
+          <input type="tel" id="mobile" placeholder="98765 43210" required>
+          <span class="error-msg">Enter a valid 10-digit mobile number</span>
+        </div>
+
+        <div class="field" id="passField">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="••••••••" required>
+            <button type="button" class="toggle-pass">Show</button>
+          </div>
+          <span class="error-msg">Password must be at least 6 characters</span>
+        </div>
+
+        <div class="field" id="confirmField">
+          <label for="confirm">Confirm password</label>
+          <div class="input-wrap">
+            <input type="password" id="confirm" placeholder="••••••••" required>
+            <button type="button" class="toggle-pass">Show</button>
+          </div>
+          <span class="error-msg">Passwords do not match</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="registerBtn">Register</button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+</main>
+
+<script>
+  const API_BASE = "http://127.0.0.1:5000/api";
+
+  document.querySelectorAll(".error-msg").forEach(el => el.style.display = "none");
+
+  function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const errorEl = field.querySelector(".error-msg");
+    if (errorEl) {
+      if (message) errorEl.textContent = message;
+      errorEl.style.display = "block";
+    }
+    field.classList.add("invalid");
+  }
+
+  function clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    const errorEl = field.querySelector(".error-msg");
+    if (errorEl) errorEl.style.display = "none";
+    field.classList.remove("invalid");
+  }
+
+  function showFormError(message) {
+    const el = document.getElementById("formError");
+    el.textContent = message;
+    el.style.display = "block";
+  }
+
+  function clearFormError() {
+    document.getElementById("formError").style.display = "none";
+  }
+
+  document.querySelectorAll(".toggle-pass").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const input = this.previousElementSibling;
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+      this.textContent = isHidden ? "Hide" : "Show";
+    });
+  });
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const MOBILE_RE = /^[6-9]\d{9}$/; // 10-digit Indian mobile number
+
+  document.getElementById("registerForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    clearFormError();
+    ["nameField", "emailField", "mobileField", "passField", "confirmField"].forEach(clearFieldError);
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const mobile = document.getElementById("mobile").value.trim().replace(/\s+/g, "");
+    const password = document.getElementById("password").value;
+    const confirm = document.getElementById("confirm").value;
+
+    let hasError = false;
+
+    if (!name) {
+      showFieldError("nameField");
+      hasError = true;
+    }
+    if (!EMAIL_RE.test(email)) {
+      showFieldError("emailField");
+      hasError = true;
+    }
+    if (!MOBILE_RE.test(mobile)) {
+      showFieldError("mobileField");
+      hasError = true;
+    }
+    if (password.length < 6) {
+      showFieldError("passField");
+      hasError = true;
+    }
+    if (confirm !== password) {
+      showFieldError("confirmField");
+      hasError = true;
+    }
+    if (hasError) return;
+
+    const btn = document.getElementById("registerBtn");
+    btn.disabled = true;
+    btn.textContent = "Creating account…";
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, phone: mobile })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showFormError(data.error || "Registration failed. Please try again.");
+        btn.disabled = false;
+        btn.textContent = "Register";
+        return;
+      }
+
+      // Auto-login right after signup — same storage keys login.html uses.
+      localStorage.setItem("ruchiToken", data.token);
+      localStorage.setItem("ruchiCustomer", JSON.stringify(data.customer));
+      if (data.customer.phone) {
+        localStorage.setItem("ruchiPhone", data.customer.phone);
+      }
+
+      window.location.href = "index.html";
+    } catch (err) {
+      console.error("Registration error:", err);
+      showFormError(`Couldn't reach the server — is the backend running? (${err.message})`);
+      btn.disabled = false;
+      btn.textContent = "Register";
+    }
+  });
+</script>
+
+<script src="js/script.js"></script>
+<script src="js/navbar.js"></script>
+</body>
+</body>
+</html>

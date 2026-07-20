@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <h1>Products</h1>
+  <a href="{{ url_for('admin.add_product') }}" class="btn btn-primary">+ Add Product</a>
+</div>
+
+<div class="card">
+  {% if products %}
+  <table>
+    <thead>
+      <tr><th></th><th>Name</th><th>Cuisine</th><th>Price</th><th>Rating</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td><img class="thumb" src="{{ p.image_url or 'https://via.placeholder.com/48' }}" alt=""></td>
+        <td><strong>{{ p.name }}</strong></td>
+        <td>{{ p.cuisine }}</td>
+        <td>₹{{ p.price_value }}</td>
+        <td>⭐ {{ p.rating }}</td>
+        <td>
+          {% if p.is_active %}
+            <span class="pill Delivered">Active</span>
+          {% else %}
+            <span class="pill Cancelled">Hidden</span>
+          {% endif %}
+        </td>
+        <td style="white-space:nowrap;">
+          <a href="{{ url_for('admin.edit_product', product_id=p.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          {% if p.is_active %}
+          <form method="POST" action="{{ url_for('admin.delete_product', product_id=p.id) }}" style="display:inline;"
+                onsubmit="return confirm('Remove {{ p.name }} from the menu?');">
+            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--ink-soft);">No products yet. <a href="{{ url_for('admin.add_product') }}" style="color:var(--accent); font-weight:700;">Add your first one</a>.</p>
+  {% endif %}
+</div>
+{% endblock %}
