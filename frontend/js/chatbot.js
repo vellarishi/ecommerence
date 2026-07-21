@@ -207,7 +207,7 @@
 
   // ===== Backend URLs =====
   const CHAT_API = "https://ecommerence-3lrk.onrender.com/chat";
-  const ORDERS_API = "http://127.0.0.1:5000/api/orders";
+  const ORDERS_API = "https://ecommerence-3lrk.onrender.com/api/orders";
 
   let awaitingPhoneFor = null;
 
