@@ -94,6 +94,16 @@
 <script>
   const API_BASE = "https://ecommerence-3lrk.onrender.com/api";
 
+  // If the user is already logged in, don't make them log in again —
+  // send them straight to wherever they were headed (or home).
+  (function redirectIfAlreadyLoggedIn() {
+    const existingToken = localStorage.getItem("ruchiToken");
+    if (existingToken) {
+      const params = new URLSearchParams(window.location.search);
+      window.location.href = params.get("redirect") || "index.html";
+    }
+  })();
+
   // Ensure error messages start hidden regardless of what style.css does —
   // JS-driven display avoids relying on an unknown CSS convention.
   document.querySelectorAll(".error-msg").forEach(el => el.style.display = "none");
@@ -186,7 +196,11 @@
         localStorage.setItem("ruchiPhone", data.customer.phone);
       }
 
-      window.location.href = "index.html";
+      // If the user was sent here from checkout (or any other
+      // login-required page), send them back there instead of home.
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get("redirect") || "index.html";
+      window.location.href = redirectTo;
     } catch (err) {
       console.error("Login error:", err);
       showFormError(`Couldn't reach the server — is the backend running? (${err.message})`);
@@ -198,6 +212,5 @@
 
 <script src="js/script.js"></script>
 <script src="js/navbar.js"></script>
-</body>
 </body>
 </html>

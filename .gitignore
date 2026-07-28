@@ -1,19 +1,9 @@
-# Python
+venv/
+chatbot-service/venv/
 __pycache__/
 *.pyc
-.venv/
-venv/
-env/
-
-# Flask
-backend/instance/
-*.db
-
-# Environment variables
 .env
-
-# OS / editor
-.DS_Store
-Thumbs.db
 .vscode/
-.claude/settings.local.json
+.claude/backend/firebase-key.json 
+backend/.env 
+backend/instance/ 

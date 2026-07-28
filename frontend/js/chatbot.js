@@ -209,19 +209,19 @@
   const CHAT_API = "https://ecommerence-3lrk.onrender.com/chat";
   const ORDERS_API = "https://ecommerence-3lrk.onrender.com/api/orders";
 
-  let awaitingPhoneFor = null;
+  let awaitingPhoneFor = null; // "track" | "items"
 
   function startConversation() {
     body.innerHTML = "";
-    botReply("Hi there! 👋 I'm the Ruchi assistant. Ask me anything — delivery time, restaurants, or say 'track my order' to check your order status.");
+    botReply("Hi there! 👋 I'm the Ruchi assistant. Ask me anything — delivery time, restaurants, or say 'track my order' or 'what did I order' to check your order.");
   }
 
-  function askForPhone() {
-    awaitingPhoneFor = "track";
+  function askForPhone(intent) {
+    awaitingPhoneFor = intent;
     botReply("Sure! Please type the phone number used for your order.");
   }
 
-  async function lookupOrder(phone) {
+  async function lookupOrder(phone, intent) {
     botReply("Checking your order… ⏳");
     try {
       const res = await fetch(`${ORDERS_API}?phone=${encodeURIComponent(phone)}`);
@@ -234,10 +234,22 @@
 
       const orders = Array.isArray(data) ? data : [data];
       const latest = orders[0];
-      const statusText = latest.status || "Processing";
       const orderId = latest.id || latest.order_id || "—";
 
-      botReply(`📦 Order #${orderId} — Status: ${statusText}`);
+      if (intent === "items") {
+        const items = latest.items || [];
+        if (items.length === 0) {
+          botReply(`📦 Order #${orderId} doesn't have item details on file.`);
+        } else {
+          const list = items
+            .map((it) => `• ${it.name || "Item"} x${it.quantity || 1}`)
+            .join("\n");
+          botReply(`📦 Order #${orderId} — you ordered:\n${list}`);
+        }
+      } else {
+        const statusText = latest.status || "Processing";
+        botReply(`📦 Order #${orderId} — Status: ${statusText}`);
+      }
     } catch (err) {
       console.error("Order lookup error:", err);
       botReply("Sorry, I couldn't reach the order system right now. Please check the Orders page directly.");
@@ -264,15 +276,19 @@
     const t = text.toLowerCase();
 
     // If we previously asked for a phone number, treat this message as the phone
-    if (awaitingPhoneFor === "track") {
+    if (awaitingPhoneFor) {
+      const intent = awaitingPhoneFor;
       awaitingPhoneFor = null;
-      lookupOrder(text.trim());
+      lookupOrder(text.trim(), intent);
       return;
     }
 
-    // Only trigger phone-lookup flow for explicit order-tracking intent
-    if (/track my order|order status|where is my order|track order/.test(t)) {
-      askForPhone();
+    // "what did I order" / "what items did I order" etc. — show the order's items
+    if (/what.*(items|did i order|i ordered)|order items|items i ordered/.test(t)) {
+      askForPhone("items");
+    // Explicit order-status/tracking intent
+    } else if (/track my order|order status|where is my order|track order/.test(t)) {
+      askForPhone("track");
     } else {
       askAI(text); // everything else (including "delivery time") goes to the AI
     }

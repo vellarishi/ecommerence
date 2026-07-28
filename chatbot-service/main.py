@@ -11,8 +11,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 import logging
 
-# Load environment variables from the shared root .env before RAGEngine() reads HF_TOKEN
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+# Load environment variables from the shared root .env before RAGEngine() reads GROQ_API_KEY
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 from rag_engine import RAGEngine
 from escalation import EscalationEngine, EscalationCriteria

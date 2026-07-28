@@ -319,6 +319,18 @@
     document.getElementById("checkoutBtn").addEventListener("click", async function () {
       clearCheckoutError();
 
+      // Block checkout entirely if the user isn't logged in — this is
+      // the actual gate. Without this check, anyone can call the order
+      // API directly from this page without ever touching login.html.
+      const token = localStorage.getItem("ruchiToken");
+      if (!token) {
+        showCheckoutError("Please login to place your order. Redirecting…");
+        setTimeout(() => {
+          window.location.href = "login.html?redirect=cart.html";
+        }, 900);
+        return; // stop here — the order API call below never runs
+      }
+
       const cart = getCart();
       if (cart.length === 0) {
         showCheckoutError("Your cart is empty. Add something first!");
@@ -341,7 +353,10 @@
       try {
         const res = await fetch(`${API_BASE}/orders`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify({
             customerName: name,
             customerPhone: phone,
@@ -376,6 +391,5 @@
   </script>
 <script src="js/navbar.js"></script>
 <script src="js/chatbot.js"></script>
-</body>
 </body>
 </html>

@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 
-from extensions import db
+from extensions import db, rtdb
+import time
+
 from models import Admin, Product, Order
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -144,5 +146,16 @@ def update_order_status(order_id):
     if new_status in ["Placed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"]:
         order.status = new_status
         db.session.commit()
+
+        # Firebase-கும் push pண்ணுறோம் — real-time status + notification
+        rtdb.reference(f'orders/order_{order.id}').set({
+            'status': new_status,
+            'updated_at': int(time.time())
+        })
+        rtdb.reference(f'notifications/order_{order.id}').set({
+            'message': f'Your order is now {new_status}!',
+            'timestamp': int(time.time())
+        })
+
         flash(f"Order #{order.id} marked as {new_status}.", "success")
     return redirect(url_for("admin.orders"))

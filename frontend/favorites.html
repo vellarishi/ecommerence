@@ -59,10 +59,31 @@
     .fav-card:hover .fav-card-media img {
       transform: scale(1.05);
     }
+    /* Category label overlay on top of the photo */
+    .fav-card-media .media-tag {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 1;
+      color: #fff;
+      font-weight: 700;
+      font-size: .72rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(0,0,0,.5);
+    }
+    .fav-card-media::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.55), transparent 55%);
+      z-index: 0;
+    }
     .fav-btn {
       position: absolute;
       top: 12px;
       right: 12px;
+      z-index: 2;
       width: 36px;
       height: 36px;
       border-radius: 50%;
@@ -167,40 +188,16 @@
   </main>
 
   <script>
-    function foodImage(emoji, colorA, colorB, label) {
-      const gradId = "g" + Math.random().toString(36).slice(2, 8);
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">
-          <defs>
-            <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="${colorA}"/>
-              <stop offset="100%" stop-color="${colorB}"/>
-            </linearGradient>
-            <pattern id="dots-${gradId}" width="26" height="26" patternUnits="userSpaceOnUse">
-              <circle cx="2" cy="2" r="1.4" fill="#ffffff" fill-opacity="0.16"/>
-            </pattern>
-          </defs>
-          <rect width="400" height="300" fill="url(#${gradId})"/>
-          <rect width="400" height="300" fill="url(#dots-${gradId})"/>
-          <circle cx="200" cy="128" r="58" fill="#ffffff" fill-opacity="0.94"/>
-          <circle cx="200" cy="128" r="58" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2"/>
-          <text x="200" y="128" font-size="58" text-anchor="middle" dominant-baseline="central">${emoji}</text>
-          <text x="200" y="222" font-family="Georgia, serif" font-size="21" font-weight="700"
-                text-anchor="middle" fill="#ffffff" letter-spacing="0.5">${label}</text>
-          <rect x="170" y="234" width="60" height="2" fill="#ffffff" fill-opacity="0.6"/>
-        </svg>`;
-      return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
-    }
-
+    // Real food photos (Unsplash, direct CDN URLs — stable, no attribution required)
     const sampleFavorites = [
-      { id: 1, name: "Spice Garden",     cuisine: "South Indian",     rating: 4.5, priceValue: 250, deliveryTime: "30-40 min", image: foodImage("🥞", "#C4491D", "#96350F", "SOUTH INDIAN") },
-      { id: 2, name: "Pizza Point",      cuisine: "Italian",          rating: 4.2, priceValue: 450, deliveryTime: "25-35 min", image: foodImage("🍕", "#E8A93B", "#C98A1E", "ITALIAN") },
-      { id: 3, name: "Dragon Wok",       cuisine: "Chinese",          rating: 4.0, priceValue: 300, deliveryTime: "35-45 min", image: foodImage("🍜", "#4C7256", "#33523B", "CHINESE") },
-      { id: 4, name: "Burger Bay",       cuisine: "Fast Food",        rating: 4.3, priceValue: 150, deliveryTime: "20-30 min", image: foodImage("🍔", "#C4491D", "#E8A93B", "FAST FOOD") },
-      { id: 5, name: "Tandoori Nights",  cuisine: "North Indian",     rating: 4.6, priceValue: 380, deliveryTime: "35-50 min", image: foodImage("🍗", "#96350F", "#C4491D", "NORTH INDIAN") },
-      { id: 6, name: "Sushi Central",    cuisine: "Japanese",         rating: 4.7, priceValue: 520, deliveryTime: "40-55 min", image: foodImage("🍣", "#241C15", "#4C7256", "JAPANESE") },
-      { id: 7, name: "Taco Fiesta",      cuisine: "Mexican",          rating: 4.1, priceValue: 280, deliveryTime: "25-40 min", image: foodImage("🌮", "#C98A1E", "#C4491D", "MEXICAN") },
-      { id: 8, name: "Green Bowl",       cuisine: "Healthy / Salads", rating: 4.4, priceValue: 220, deliveryTime: "20-30 min", image: foodImage("🥗", "#4C7256", "#6B5E4F", "HEALTHY") }
+      { id: 1, name: "Spice Garden",     cuisine: "South Indian",     rating: 4.5, priceValue: 250, deliveryTime: "30-40 min", label: "SOUTH INDIAN", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&h=375&fit=crop&q=80" },
+      { id: 2, name: "Pizza Point",      cuisine: "Italian",          rating: 4.2, priceValue: 450, deliveryTime: "25-35 min", label: "ITALIAN",      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=375&fit=crop&q=80" },
+      { id: 3, name: "Dragon Wok",       cuisine: "Chinese",          rating: 4.0, priceValue: 300, deliveryTime: "35-45 min", label: "CHINESE",      image: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=500&h=375&fit=crop&q=80" },
+      { id: 4, name: "Burger Bay",       cuisine: "Fast Food",        rating: 4.3, priceValue: 150, deliveryTime: "20-30 min", label: "FAST FOOD",    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=375&fit=crop&q=80" },
+      { id: 5, name: "Tandoori Nights",  cuisine: "North Indian",     rating: 4.6, priceValue: 380, deliveryTime: "35-50 min", label: "NORTH INDIAN", image: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=500&h=375&fit=crop&q=80" },
+      { id: 6, name: "Sushi Central",    cuisine: "Japanese",         rating: 4.7, priceValue: 520, deliveryTime: "40-55 min", label: "JAPANESE",     image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=500&h=375&fit=crop&q=80" },
+      { id: 7, name: "Taco Fiesta",      cuisine: "Mexican",          rating: 4.1, priceValue: 280, deliveryTime: "25-40 min", label: "MEXICAN",      image: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=500&h=375&fit=crop&q=80" },
+      { id: 8, name: "Green Bowl",       cuisine: "Healthy / Salads", rating: 4.4, priceValue: 220, deliveryTime: "20-30 min", label: "HEALTHY",      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=375&fit=crop&q=80" }
     ];
 
     function updateFavCountTag(n) {
@@ -228,7 +225,8 @@
         list.map((r) => `
           <div class="fav-card">
             <div class="fav-card-media">
-              <img src="${r.image}" alt="${r.name}">
+              <img src="${r.image}" alt="${r.name}" loading="lazy">
+              <span class="media-tag">${r.label}</span>
               <button class="fav-btn active" data-id="${r.id}" title="Remove from favorites">♥</button>
             </div>
             <div class="fav-card-body">
@@ -259,6 +257,5 @@
   <script src="js/script.js"></script>
   <script src="js/navbar.js"></script>
   <script src="js/chatbot.js"></script>
-</body>
 </body>
 </html>

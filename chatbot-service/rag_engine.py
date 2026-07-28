@@ -1,47 +1,82 @@
 """
 RAG (Retrieval-Augmented Generation) Engine
-Handles document retrieval and LLM integration (Hugging Face Inference API)
+Handles document retrieval (HF Inference API embeddings) and LLM integration (Groq)
 """
 
 import os
 from pathlib import Path
 from typing import Optional, List, Dict
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from huggingface_hub import InferenceClient
+from openai import OpenAI
 from dotenv import load_dotenv
 from knowledge_base import get_all_knowledge, search_knowledge
 
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+load_dotenv(Path(__file__).resolve().parent / ".env")
+
+
+def _to_sentence_vector(raw_embedding) -> np.ndarray:
+    """
+    Normalize whatever the HF API returns into a single 1D sentence vector.
+    The feature-extraction endpoint sometimes returns one vector per TOKEN
+    instead of one per SENTENCE — if we don't mean-pool that down to one
+    vector, similarity comparisons come out meaningless. This guarantees
+    every embedding we compare is the same shape, computed the same way.
+    """
+    arr = np.array(raw_embedding, dtype=float)
+    if arr.ndim == 1:
+        return arr
+    elif arr.ndim == 2:
+        return arr.mean(axis=0)
+    else:
+        return arr.reshape(-1)
+
 
 class RAGEngine:
     def __init__(self, api_key: Optional[str] = None):
-        """Initialize RAG Engine with Hugging Face Inference API"""
-        self.model = "meta-llama/Llama-3.2-3B-Instruct:featherless-ai"
-        self.client = InferenceClient(api_key=api_key or os.environ["HF_TOKEN"])
+        """
+        Embeddings: Hugging Face Inference API (no local torch — avoids the
+        Windows DLL crash entirely, since nothing runs on this machine).
+
+        Generation: Groq's OpenAI-compatible API — kept as-is, this part
+        was already working.
+        """
+        self.embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+        self.embed_client = InferenceClient(api_key=os.environ["HF_TOKEN"])
+
+        self.model = "llama-3.1-8b-instant"
+        self.client = OpenAI(
+            api_key=api_key or os.environ["GROQ_API_KEY"],
+            base_url="https://api.groq.com/openai/v1",
+        )
+
         self.knowledge_base = get_all_knowledge()
         self._initialize_vectorizer()
 
     def _initialize_vectorizer(self):
-        """Initialize TF-IDF vectorizer for document retrieval"""
+        """Pre-compute SEMANTIC EMBEDDINGS for every KB entry, once, at startup."""
         documents = []
         for doc in self.knowledge_base:
             combined_text = f"{doc['question']} {doc['answer']}"
             documents.append(combined_text)
 
-        self.vectorizer = TfidfVectorizer(max_features=100, stop_words='english')
-        self.doc_vectors = self.vectorizer.fit_transform(documents)
+        self.doc_vectors = np.array([
+            _to_sentence_vector(
+                self.embed_client.feature_extraction(text, model=self.embedding_model)
+            )
+            for text in documents
+        ])
 
     def retrieve_relevant_documents(self, query: str, top_k: int = 3) -> List[Dict]:
-        """
-        Retrieve top-k most relevant documents using TF-IDF similarity
-        """
+        """Retrieve top-k most relevant documents using SEMANTIC similarity."""
         keyword_results = search_knowledge(query)
 
-        query_vector = self.vectorizer.transform([query])
-        similarities = cosine_similarity(query_vector, self.doc_vectors)[0]
+        query_vector = _to_sentence_vector(
+            self.embed_client.feature_extraction(query, model=self.embedding_model)
+        ).reshape(1, -1)
 
+        similarities = cosine_similarity(query_vector, self.doc_vectors)[0]
         top_indices = np.argsort(similarities)[-top_k:][::-1]
 
         retrieved_docs = []
@@ -68,9 +103,7 @@ class RAGEngine:
         return retrieved_docs[:top_k]
 
     def generate_response(self, query: str, retrieved_docs: List[Dict]) -> Dict:
-        """
-        Generate response using Hugging Face Inference API with retrieved context
-        """
+        """Generate response using Groq with retrieved context"""
         try:
             context = ""
             for i, doc in enumerate(retrieved_docs, 1):
@@ -107,9 +140,6 @@ If the query cannot be answered from the knowledge base, politely inform the cus
             }
 
         except Exception as e:
-            # Hugging Face call failed (rate limit, network, etc). Rather than
-            # failing the whole request, fall back to the best knowledge-base
-            # match so the customer still gets an answer if we found one.
             if retrieved_docs:
                 top = retrieved_docs[0]
                 return {
@@ -128,11 +158,9 @@ If the query cannot be answered from the knowledge base, politely inform the cus
             }
 
     def _calculate_confidence(self, retrieved_docs: List[Dict]) -> float:
-        """Confidence reflects how good the best match is — averaging in
-        weaker 2nd/3rd matches would drag down a genuinely strong top hit."""
+        """Confidence reflects how good the best match is."""
         if not retrieved_docs:
             return 0.0
-
         top_similarity = max(doc.get("similarity_score", 0) for doc in retrieved_docs)
         return min(float(top_similarity), 1.0)
 
@@ -143,7 +171,6 @@ If the query cannot be answered from the knowledge base, politely inform the cus
         """
         retrieved_docs = self.retrieve_relevant_documents(query)
 
-        # High-confidence match → return exact KB answer, skip LLM
         if retrieved_docs and retrieved_docs[0].get("similarity_score", 0) >= 0.6:
             return {
                 "response": retrieved_docs[0]["answer"],
