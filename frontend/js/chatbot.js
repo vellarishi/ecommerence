@@ -192,13 +192,57 @@
   const body = win.querySelector("#ruchi-chat-body");
   const input = win.querySelector("#ruchi-chat-input");
 
-  function addMessage(text, sender) {
+  // ===== Chat history persistence (survives page refresh) =====
+  // Scoped per logged-in account (falls back to a shared "guest" bucket)
+  // so switching accounts on the same browser never shows one customer's
+  // chat — including their order details — to a different customer.
+  localStorage.removeItem("ruchiChatHistory"); // drop the old unscoped key
+  const STORAGE_KEY = `ruchiChatHistory:${localStorage.getItem("ruchiToken") || "guest"}`;
+
+  function loadHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveHistory() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  }
+
+  let history = loadHistory();
+
+  function renderHistory() {
+    body.innerHTML = "";
+    history.forEach((m) => {
+      const el = document.createElement("div");
+      el.className = `ruchi-msg ${m.sender}`;
+      el.textContent = m.text;
+      body.appendChild(el);
+    });
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function addMessage(text, sender, persist = true) {
     const el = document.createElement("div");
     el.className = `ruchi-msg ${sender}`;
     el.textContent = text;
     body.appendChild(el);
     body.scrollTop = body.scrollHeight;
+    if (persist) {
+      history.push({ text, sender });
+      saveHistory();
+    }
     return el;
+  }
+
+  // Updates a placeholder bubble (e.g. the "…" typing indicator) with its
+  // final text and persists that final text — not the placeholder — to history.
+  function finalizeMessage(el, text) {
+    el.textContent = text;
+    history.push({ text, sender: "bot" });
+    saveHistory();
   }
 
   function botReply(text) {
@@ -206,19 +250,84 @@
   }
 
   // ===== Backend URLs =====
-  const CHAT_API = "https://ecommerence-3lrk.onrender.com/chat";
-  const ORDERS_API = "https://ecommerence-3lrk.onrender.com/api/orders";
+  const CHAT_API = "http://127.0.0.1:8000/chat";
+  const ORDERS_API = "http://127.0.0.1:5000/api/orders";
 
-  let awaitingPhoneFor = null; // "track" | "items"
+  let awaitingPhoneFor = null; // "track" | "items" | "spending"
 
   function startConversation() {
     body.innerHTML = "";
-    botReply("Hi there! 👋 I'm the Ruchi assistant. Ask me anything — delivery time, restaurants, or say 'track my order' or 'what did I order' to check your order.");
+    history = [];
+    saveHistory();
+    botReply("Hi there! 👋 I'm the Ruchi assistant. Ask me anything — delivery time, restaurants, or say 'track my order', 'what did I order', or 'how much have I spent' to check your order.");
   }
 
   function askForPhone(intent) {
     awaitingPhoneFor = intent;
     botReply("Sure! Please type the phone number used for your order.");
+  }
+
+  function replyWithLatestOrder(orders, intent) {
+    if (!orders || orders.length === 0) {
+      botReply("I couldn't find any orders on your account yet. Visit the Restaurants page to place your first order.");
+      return;
+    }
+
+    const latest = orders[0];
+    const orderId = latest.id || latest.order_id || "—";
+
+    if (intent === "items") {
+      const items = latest.items || [];
+      if (items.length === 0) {
+        botReply(`📦 Order #${orderId} doesn't have item details on file.`);
+      } else {
+        const list = items
+          .map((it) => `• ${it.name || "Item"} x${it.quantity || 1}`)
+          .join("\n");
+        botReply(`📦 Order #${orderId} — you ordered:\n${list}`);
+      }
+    } else {
+      const statusText = latest.status || "Processing";
+      botReply(`📦 Order #${orderId} — Status: ${statusText}`);
+    }
+  }
+
+  // NEW: total amount spent across all of a customer's orders
+  function replyWithSpending(orders) {
+    if (!orders || orders.length === 0) {
+      botReply("You haven't placed any orders yet — nothing spent so far!");
+      return;
+    }
+    const totalSpent = orders
+      .filter((o) => o.status !== "Cancelled")
+      .reduce((sum, o) => sum + (o.total || 0), 0);
+    botReply(`💰 You've placed ${orders.length} order(s) and spent a total of ₹${totalSpent} so far.`);
+  }
+
+  // Logged-in customers get their orders looked up by their account
+  // (via the bearer token) — no need to ask for a phone number.
+  async function lookupMyOrders(intent) {
+    const token = localStorage.getItem("ruchiToken");
+    if (!token) return false;
+    botReply("Checking your order… ⏳");
+    try {
+      const res = await fetch(`${ORDERS_API}/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!res.ok) return false; // token missing/expired — fall back to phone lookup
+      const data = await res.json();
+      const orders = Array.isArray(data) ? data : [];
+
+      if (intent === "spending") {
+        replyWithSpending(orders);
+      } else {
+        replyWithLatestOrder(orders, intent);
+      }
+      return true;
+    } catch (err) {
+      console.error("Order lookup error:", err);
+      return false;
+    }
   }
 
   async function lookupOrder(phone, intent) {
@@ -233,22 +342,11 @@
       }
 
       const orders = Array.isArray(data) ? data : [data];
-      const latest = orders[0];
-      const orderId = latest.id || latest.order_id || "—";
 
-      if (intent === "items") {
-        const items = latest.items || [];
-        if (items.length === 0) {
-          botReply(`📦 Order #${orderId} doesn't have item details on file.`);
-        } else {
-          const list = items
-            .map((it) => `• ${it.name || "Item"} x${it.quantity || 1}`)
-            .join("\n");
-          botReply(`📦 Order #${orderId} — you ordered:\n${list}`);
-        }
+      if (intent === "spending") {
+        replyWithSpending(orders);
       } else {
-        const statusText = latest.status || "Processing";
-        botReply(`📦 Order #${orderId} — Status: ${statusText}`);
+        replyWithLatestOrder(orders, intent);
       }
     } catch (err) {
       console.error("Order lookup error:", err);
@@ -257,18 +355,19 @@
   }
 
   async function askAI(text) {
-    const typingEl = addMessage("…", "bot");
+    const typingEl = addMessage("…", "bot", false);
     try {
+      const token = localStorage.getItem("ruchiToken");
       const res = await fetch(CHAT_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text })
+        body: JSON.stringify({ message: text, token })
       });
       const data = await res.json();
-      typingEl.textContent = data.response || "Sorry, I didn't quite get that.";
+      finalizeMessage(typingEl, data.response || "Sorry, I didn't quite get that.");
     } catch (err) {
       console.error("Chatbot AI error:", err);
-      typingEl.textContent = "I'm having trouble connecting right now. Please try again in a moment.";
+      finalizeMessage(typingEl, "I'm having trouble connecting right now. Please try again in a moment.");
     }
   }
 
@@ -283,21 +382,52 @@
       return;
     }
 
-    // "what did I order" / "what items did I order" etc. — show the order's items
-    if (/what.*(items|did i order|i ordered)|order items|items i ordered/.test(t)) {
-      askForPhone("items");
+    // "how much have I spent" / "total amount" / "amt spent" — spending intent
+    if (/how much.*(spent|spend)|amt.*spent|amount.*spent|total.*(spent|spend|paid)|how many amt/.test(t)) {
+      resolveOrderIntent("spending");
     // Explicit order-status/tracking intent
     } else if (/track my order|order status|where is my order|track order/.test(t)) {
-      askForPhone("track");
+      resolveOrderIntent("track");
+    // Any other first-person question about their order's contents — "what did
+    // I order", "what dishes/items/flavour do I have", typos and rephrasings
+    // included. Broad on purpose: a fixed phrase list keeps missing real
+    // questions (e.g. "flavour" instead of "items").
+    } else if (/\b(order|dish|item|flavou?r|food|meal|ate|eat|bought)\w*\b/.test(t) && /\b(i|my|me|mine)\b/.test(t)) {
+      if (localStorage.getItem("ruchiToken")) {
+        // Logged in — the AI already gets this customer's full order + item
+        // history via the token, and can reason across all their orders
+        // (not just the latest one), so let it answer directly.
+        askAI(text);
+      } else {
+        // Guest — the AI has no way to know who they are, so fall back to
+        // the phone-number lookup flow instead of a generic "no data" reply.
+        resolveOrderIntent("items");
+      }
     } else {
       askAI(text); // everything else (including "delivery time") goes to the AI
     }
   }
 
+  // Logged-in customers get looked up by account automatically;
+  // only ask for a phone number as a guest fallback.
+  async function resolveOrderIntent(intent) {
+    if (localStorage.getItem("ruchiToken")) {
+      const found = await lookupMyOrders(intent);
+      if (found) return;
+    }
+    askForPhone(intent);
+  }
+
   bubble.addEventListener("click", () => {
     win.classList.add("open");
     bubble.style.display = "none";
-    if (body.children.length === 0) startConversation();
+    if (body.children.length === 0) {
+      if (history.length > 0) {
+        renderHistory();
+      } else {
+        startConversation();
+      }
+    }
   });
 
   win.querySelector("#ruchi-chat-close").addEventListener("click", () => {

@@ -79,14 +79,14 @@ def create_order():
     )
     db.session.add(order)
 
-    total = 0
+    subtotal = 0
     for entry in items_input:
         product = Product.query.get(entry.get("productId"))
         if not product:
             continue
         quantity = max(int(entry.get("quantity", 1)), 1)
         line_total = product.price_value * quantity
-        total += line_total
+        subtotal += line_total
 
         order.items.append(OrderItem(
             product_id=product.id,
@@ -95,7 +95,17 @@ def create_order():
             quantity=quantity,
         ))
 
-    order.total = total
+    # Delivery is currently advertised as free (see cart.html); tax is a flat
+    # 5% GST-style charge on the subtotal. No discount engine exists yet.
+    delivery_fee = 0
+    tax = round(subtotal * 0.05)
+    discount = 0
+
+    order.subtotal = subtotal
+    order.delivery_fee = delivery_fee
+    order.tax = tax
+    order.discount = discount
+    order.total = subtotal + delivery_fee + tax - discount
     db.session.commit()
 
     return jsonify(order.to_dict()), 201

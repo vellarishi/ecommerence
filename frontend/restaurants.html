@@ -27,6 +27,7 @@
         </a>
         <a href="login.html" class="btn btn-dark btn-sm">Login</a>
       </div>
+      <button class="nav-toggle" aria-label="Menu"><span></span></button>
     </div>
   </nav>
 
@@ -62,26 +63,7 @@
   </section>
 
   <script>
-    const API_BASE = "https://ecommerence-3lrk.onrender.com/api";
-
-    const LOCAL_RESTAURANTS = [
-      { id: "local-1", name: "Curry Leaf", cuisine: "South Indian", rating: 4.6, deliveryTime: "25-35 min", priceValue: 220, image: "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=600&h=400&fit=crop" },
-      { id: "local-2", name: "Punjabi Tadka", cuisine: "North Indian", rating: 4.4, deliveryTime: "30-40 min", priceValue: 280, image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600&h=400&fit=crop" },
-      { id: "local-3", name: "Golden Dragon", cuisine: "Chinese", rating: 4.1, deliveryTime: "35-45 min", priceValue: 320, image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&h=400&fit=crop" },
-      { id: "local-4", name: "Bella Napoli", cuisine: "Italian", rating: 4.7, deliveryTime: "25-30 min", priceValue: 400, image: "https://images.unsplash.com/photo-1595854341625-f33ee10dbf94?w=600&h=400&fit=crop" },
-      { id: "local-5", name: "Green Bowl", cuisine: "Healthy", rating: 4.8, deliveryTime: "20-30 min", priceValue: 260, image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&h=400&fit=crop" },
-      { id: "local-6", name: "Sugar Rush", cuisine: "Desserts", rating: 4.5, deliveryTime: "15-25 min", priceValue: 180, image: "https://images.unsplash.com/photo-1587314168485-3236d6710814?w=600&h=400&fit=crop" },
-      { id: "local-7", name: "Momo Point", cuisine: "Chinese", rating: 4.3, deliveryTime: "20-30 min", priceValue: 200, image: "https://images.unsplash.com/photo-1626804475297-41608ea09aeb?w=600&h=400&fit=crop" },
-      { id: "local-8", name: "Tandoor Nights", cuisine: "North Indian", rating: 4.6, deliveryTime: "30-40 min", priceValue: 310, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600&h=400&fit=crop" },
-      { id: "local-9", name: "Choco Bliss", cuisine: "Desserts", rating: 4.9, deliveryTime: "15-20 min", priceValue: 150, image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&h=400&fit=crop" },
-      { id: "local-10", name: "Saffron South", cuisine: "South Indian", rating: 4.5, deliveryTime: "25-35 min", priceValue: 240, image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600&h=400&fit=crop" },
-      { id: "local-11", name: "Royal Mughal", cuisine: "North Indian", rating: 4.7, deliveryTime: "30-45 min", priceValue: 350, image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&h=400&fit=crop" },
-      { id: "local-12", name: "Wok Express", cuisine: "Chinese", rating: 4.2, deliveryTime: "25-35 min", priceValue: 260, image: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=600&h=400&fit=crop" },
-      { id: "local-13", name: "Pasta Villa", cuisine: "Italian", rating: 4.6, deliveryTime: "20-30 min", priceValue: 380, image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&h=400&fit=crop" },
-      { id: "local-14", name: "Fit Kitchen", cuisine: "Healthy", rating: 4.7, deliveryTime: "15-25 min", priceValue: 290, image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop" },
-      { id: "local-15", name: "Cake Corner", cuisine: "Desserts", rating: 4.8, deliveryTime: "15-20 min", priceValue: 190, image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=400&fit=crop" },
-      { id: "local-16", name: "Sizzle Street", cuisine: "Fast Food", rating: 4.4, deliveryTime: "20-30 min", priceValue: 210, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&h=400&fit=crop" }
-    ];
+    const API_BASE = "http://127.0.0.1:5000/api";
 
     const FALLBACK_IMAGES = {
       "South Indian": "https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop",
@@ -104,23 +86,14 @@
     let searchQuery = "";
 
     async function loadRestaurants() {
-      // Show the 16 local restaurants immediately — no waiting on the
-      // backend. This is what fixes the "slow to open" feeling.
-      restaurants = [...LOCAL_RESTAURANTS];
-      renderRestaurants();
-
-      // Then fetch the database restaurants in the background and
-      // merge them in once they arrive (could take 30-50s if the
-      // Render backend was asleep — but the page is already usable).
       try {
         const res = await fetch(`${API_BASE}/products`);
         if (!res.ok) throw new Error(`Server responded ${res.status}`);
-        const apiRestaurants = await res.json();
-        restaurants = [...apiRestaurants, ...LOCAL_RESTAURANTS];
+        restaurants = await res.json();
         renderRestaurants();
       } catch (err) {
         console.error("Failed to load restaurants from API:", err);
-        // Local restaurants are already showing — nothing more to do.
+        document.getElementById("resultCount").textContent = "Couldn't load restaurants — is the backend running?";
       }
     }
 
@@ -164,7 +137,7 @@
                 <span>${r.cuisine}</span>
                 <span>${r.deliveryTime}</span>
               </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+              <div class="card-actions">
                 <p class="price-tag">₹${r.priceValue}</p>
                 <button class="btn btn-primary btn-sm add-to-cart" data-id="${r.id}">Add to Cart</button>
               </div>

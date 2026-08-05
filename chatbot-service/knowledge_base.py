@@ -3,27 +3,17 @@ Knowledge Base for Customer Support Chatbot
 Contains Ruchi-specific FAQ and company information
 """
 
-KNOWLEDGE_BASE = [
+import re
+
+from db_products import get_active_products
+
+STATIC_KNOWLEDGE_BASE = [
     {
         "id": 1,
         "category": "Delivery",
         "question": "How long does delivery take?",
         "answer": "Most orders are delivered within 30-40 minutes, depending on the restaurant and your location in Salem.",
         "keywords": ["delivery", "time", "how long", "fast", "minutes"]
-    },
-    {
-        "id": 2,
-        "category": "Restaurants",
-        "question": "What restaurants are available?",
-        "answer": "We currently feature Spice Garden (South Indian), Pizza Point (Italian), Dragon Wok (Chinese), and Burger Bay (Fast Food), with more being added regularly.",
-        "keywords": ["restaurant", "restaurants", "cuisine", "available", "options"]
-    },
-    {
-        "id": 3,
-        "category": "Restaurants",
-        "question": "What does Spice Garden serve?",
-        "answer": "Spice Garden serves classic South Indian tiffin and meals — dosas, idlis, and traditional thalis, rated 4.5 stars with 30-40 min delivery.",
-        "keywords": ["spice garden", "south indian", "taste", "menu"]
     },
     {
         "id": 4,
@@ -73,31 +63,104 @@ KNOWLEDGE_BASE = [
         "question": "Are the restaurants on Ruchi verified?",
         "answer": "Yes! Every restaurant on Ruchi is verified for hygiene and quality before being listed on our platform.",
         "keywords": ["verified", "genuine", "hygiene", "quality"]
+    },
+    {
+        "id": 11,
+        "category": "Payment",
+        "question": "How much is the tax on my order?",
+        "answer": "We charge a flat 5% tax on your order subtotal. Delivery is currently free, so your total is just the subtotal plus that 5% tax.",
+        "keywords": ["tax", "gst", "price", "charge", "fee", "delivery fee"]
     }
 ]
 
+def _build_product_knowledge() -> list:
+    """Turns live rows from ruchi.db's products table into KB entries —
+    one overview entry listing everything, plus one per restaurant — so
+    answers stay correct as products are added/edited/removed via admin,
+    instead of a hardcoded list going stale."""
+    products = get_active_products()
+    if not products:
+        return []
+
+    entries = []
+    overview = ", ".join(f"{p['name']} ({p['cuisine']})" for p in products)
+    entries.append({
+        "id": "product-overview",
+        "category": "Restaurants",
+        "question": "What restaurants are available?",
+        "answer": f"We currently feature {overview}, with more being added regularly.",
+        "keywords": ["restaurant", "restaurants", "cuisine", "available", "options", "menu", "items", "dishes", "food"]
+    })
+
+    for p in products:
+        details = f"{p['name']} serves {p['cuisine']} cuisine"
+        if p.get("description"):
+            details += f" — {p['description']}"
+        details += f", rated {p['rating']} stars with {p['delivery_time']} delivery (₹{p['price_value']})."
+        entries.append({
+            "id": f"product-{p['name']}",
+            "category": "Restaurants",
+            "question": f"What does {p['name']} serve?",
+            "answer": details,
+            "keywords": [p["name"].lower(), p["cuisine"].lower()]
+        })
+
+    return entries
+
+
 def get_all_knowledge():
-    """Return all knowledge base entries"""
-    return KNOWLEDGE_BASE
+    """Return all knowledge base entries: static FAQ + live product data."""
+    return STATIC_KNOWLEDGE_BASE + _build_product_knowledge()
+
+_WORD_RE = re.compile(r"\w+")
+
+# "ruchi" and generic question/filler words appear in almost every KB entry's
+# question, so counting them as matches drowns out the one word that's
+# actually discriminating (e.g. "items") and leaves ties decided by list
+# order instead of relevance. Stripped from the QUERY only — target text
+# stays intact since matching against it isn't the problem.
+_STOPWORDS = {
+    "ruchi", "a", "an", "the", "is", "are", "was", "were", "do", "does", "did",
+    "have", "has", "had", "this", "that", "these", "those", "what", "which",
+    "who", "whom", "how", "when", "where", "why", "having", "i", "you", "your",
+    "yours", "me", "my", "mine", "we", "our", "it", "its", "to", "of", "in",
+    "on", "for", "with", "and", "or", "so", "please", "can", "could", "would",
+    "tell", "about", "abt",
+}
+
+
+def _words(text: str) -> set:
+    return set(_WORD_RE.findall(text.lower()))
+
+
+def _query_words(text: str) -> set:
+    return _words(text) - _STOPWORDS
+
 
 def search_knowledge(query: str) -> list:
     """
-    Search knowledge base by matching keywords with query
-    Returns list of relevant articles
+    Search knowledge base by matching whole words with the query.
+    Returns list of relevant articles.
     """
-    query_words = query.lower().split()
+    query_words = _query_words(query)
     results = []
+    knowledge_base = get_all_knowledge()
 
-    for article in KNOWLEDGE_BASE:
+    for article in knowledge_base:
+        question_words = _words(article["question"])
+        answer_words = _words(article["answer"])
+        keyword_words = set()
+        for keyword in article["keywords"]:
+            keyword_words |= _words(keyword)
+
         score = 0
         for word in query_words:
-            if word in article["question"].lower():
+            if word in question_words:
                 score += 3
-            if word in article["answer"].lower():
+            if word in answer_words:
                 score += 2
-            for keyword in article["keywords"]:
-                if word in keyword.lower():
-                    score += 2
+            if word in keyword_words:
+                score += 2
 
         if score > 0:
             results.append((article, score))

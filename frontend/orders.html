@@ -76,6 +76,7 @@
       display:flex; justify-content:space-between; align-items:center; padding-top:12px;
     }
     .order-total-pro{ font-family:Georgia, serif; font-size:1.15rem; font-weight:700; color:#2b2420; }
+    .order-breakdown{ font-size:.78rem; color:#8a7f74; }
     .reorder-btn{
       font-size:.82rem; font-weight:700; color:#c0521f; border:1.5px solid #fdeee0;
       padding:8px 16px; border-radius:20px; background:transparent; cursor:pointer; transition:.15s;
@@ -148,7 +149,8 @@
   </main>
 
   <script>
-    const API_BASE = "https://ecommerence-3lrk.onrender.com/api";
+    // ⚠️ LOCAL TESTING — switch back to the Render URL before deploying live
+    const API_BASE = "http://127.0.0.1:5000/api";
 
     const statusMeta = {
       "Placed":            { cls: "placed",            label: "Order Placed" },
@@ -221,6 +223,7 @@
               </ul>
 
               <div class="order-card-footer">
+                ${order.tax > 0 ? `<span class="order-breakdown">Subtotal ₹${order.subtotal} + Tax ₹${order.tax}</span>` : ""}
                 <span class="order-total-pro">Total: ₹${order.total}</span>
               </div>
             </div>
@@ -229,6 +232,40 @@
       }).join("");
     }
 
+    // Logged-in customers: fetch their own orders via the auth token —
+    // no phone typing needed, and it's tied to the actual account.
+    async function loadMyOrders(token) {
+      const note = document.getElementById("lookupNote");
+      note.textContent = "Loading your orders…";
+
+      try {
+        const res = await fetch(`${API_BASE}/orders/me`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (res.status === 401) {
+          localStorage.removeItem("ruchiToken");
+          document.querySelector(".lookup-bar").style.display = "flex";
+          note.textContent = "Session expired — please look up by phone, or log in again.";
+          renderStats([]);
+          renderOrdersPro([]);
+          return;
+        }
+        if (!res.ok) throw new Error(`Server responded ${res.status}`);
+
+        const orders = await res.json();
+        note.textContent = "";
+        renderStats(orders);
+        renderOrdersPro(orders);
+      } catch (err) {
+        console.error("Failed to load orders:", err);
+        note.textContent = `Couldn't load orders — is the backend server running? (${err.message})`;
+        renderStats([]);
+        renderOrdersPro([]);
+      }
+    }
+
+    // Guests (not logged in): original phone-number lookup, unchanged.
     async function loadOrdersForPhone(phone) {
       const note = document.getElementById("lookupNote");
       note.textContent = "Loading your orders…";
@@ -262,14 +299,24 @@
       loadOrdersForPhone(phone);
     });
 
-    const savedPhone = localStorage.getItem("ruchiPhone");
-    if (savedPhone) {
-      document.getElementById("lookupPhone").value = savedPhone;
-      loadOrdersForPhone(savedPhone);
+    // Entry point: logged-in customers get token-based loading (phone box
+    // hidden); guests keep the original phone-lookup flow.
+    const ruchiToken = localStorage.getItem("ruchiToken");
+    const lookupBar = document.querySelector(".lookup-bar");
+
+    if (ruchiToken) {
+      if (lookupBar) lookupBar.style.display = "none";
+      loadMyOrders(ruchiToken);
     } else {
-      renderStats([]);
-      renderOrdersPro([]);
-      document.getElementById("lookupNote").textContent = "Enter your phone number above to see your orders.";
+      const savedPhone = localStorage.getItem("ruchiPhone");
+      if (savedPhone) {
+        document.getElementById("lookupPhone").value = savedPhone;
+        loadOrdersForPhone(savedPhone);
+      } else {
+        renderStats([]);
+        renderOrdersPro([]);
+        document.getElementById("lookupNote").textContent = "Enter your phone number above to see your orders.";
+      }
     }
 
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];

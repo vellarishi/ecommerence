@@ -178,6 +178,7 @@
         </a>
         <a href="login.html" class="btn btn-dark btn-sm">Login</a>
       </div>
+      <button class="nav-toggle" aria-label="Menu"><span></span></button>
     </div>
   </nav>
 
@@ -199,6 +200,10 @@
         <div class="summary-row">
           <span>Delivery Fee</span>
           <span>Free</span>
+        </div>
+        <div class="summary-row">
+          <span>Tax (5%)</span>
+          <span>₹<span id="cartTax">0</span></span>
         </div>
         <div class="summary-row total">
           <span>Total</span>
@@ -224,7 +229,7 @@
   </main>
 
   <script>
-    const API_BASE = "https://ecommerence-3lrk.onrender.com/api";
+  const API_BASE = "http://127.0.0.1:5000/api";
 
     function getCart() {
       return JSON.parse(localStorage.getItem("cart")) || [];
@@ -246,9 +251,11 @@
     }
 
     function updateCartTotal() {
-      const total = getCart().reduce((sum, item) => sum + (item.priceValue || 0), 0);
-      document.getElementById("cartTotal").textContent = total;
-      document.getElementById("cartTotalDisplay").textContent = total;
+      const subtotal = getCart().reduce((sum, item) => sum + (item.priceValue || 0), 0);
+      const tax = Math.round(subtotal * 0.05);
+      document.getElementById("cartTotal").textContent = subtotal;
+      document.getElementById("cartTax").textContent = tax;
+      document.getElementById("cartTotalDisplay").textContent = subtotal + tax;
     }
 
     function renderCart() {

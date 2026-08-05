@@ -17,7 +17,8 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 from rag_engine import RAGEngine
 from escalation import EscalationEngine, EscalationCriteria
 
-# Configure logging
+# Configur
+# e logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ class ChatQuery(BaseModel):
     message: str
     session_id: Optional[str] = None
     customer_id: Optional[str] = None
+    token: Optional[str] = None  # logged-in customer's ruchiToken, so the bot can look up their real orders
 
 class ChatResponse(BaseModel):
     """Chatbot response"""
@@ -116,7 +118,7 @@ async def process_chat(query: ChatQuery, background_tasks: BackgroundTasks):
             )
         
         # Process query through RAG pipeline
-        rag_result = rag_engine.process_query(query.message)
+        rag_result = rag_engine.process_query(query.message, token=query.token)
         
         if not rag_result["success"]:
             raise Exception(rag_result.get("error", "Unknown error"))

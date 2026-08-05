@@ -98,10 +98,23 @@ class Order(db.Model):
     customer_email = db.Column(db.String(120), nullable=True)
     customer_phone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(300), nullable=False)
+    # Price breakdown — subtotal is the sum of line items; total is what the
+    # customer actually pays (subtotal + delivery_fee + tax - discount).
+    # Kept as separate columns (not just derived from `total`) so orders.html
+    # and receipts can show exactly how the total was made up.
+    subtotal = db.Column(db.Integer, nullable=False, default=0)
+    delivery_fee = db.Column(db.Integer, nullable=False, default=0)
+    tax = db.Column(db.Integer, nullable=False, default=0)
+    discount = db.Column(db.Integer, nullable=False, default=0)
     total = db.Column(db.Integer, nullable=False)
     status = db.Column(
         db.String(30), default="Placed"
     )
+
+    # ---- NEW: payment details ----
+    payment_method = db.Column(db.String(30), nullable=False, default="COD")   # 'COD', 'UPI', 'Card'
+    amount_paid = db.Column(db.Integer, nullable=False, default=0)             # how much has actually been paid
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     items = db.relationship("OrderItem", backref="order", cascade="all, delete-orphan")
@@ -113,8 +126,14 @@ class Order(db.Model):
             "customerEmail": self.customer_email,
             "customerPhone": self.customer_phone,
             "address": self.address,
+            "subtotal": self.subtotal,
+            "deliveryFee": self.delivery_fee,
+            "tax": self.tax,
+            "discount": self.discount,
             "total": self.total,
             "status": self.status,
+            "paymentMethod": self.payment_method,   # NEW
+            "amountPaid": self.amount_paid,         # NEW
             "date": self.created_at.strftime("%d/%m/%Y"),
             "items": [item.to_dict() for item in self.items],
         }
