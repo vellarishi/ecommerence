@@ -17,6 +17,21 @@ from db_orders import get_orders_for_token
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
 
+def _require_env(key: str) -> str:
+    """
+    Fetch a required environment variable, or raise a CLEAR error naming
+    exactly which key is missing — instead of a bare KeyError that just
+    says "'HF_TOKEN'" with no context in Render's logs.
+    """
+    value = os.environ.get(key)
+    if not value:
+        raise RuntimeError(
+            f"Missing required environment variable: {key}. "
+            f"Set it in Render > Environment (or your local .env file)."
+        )
+    return value
+
+
 def _to_sentence_vector(raw_embedding) -> np.ndarray:
     """
     Normalize whatever the HF API returns into a single 1D sentence vector.
@@ -44,11 +59,11 @@ class RAGEngine:
         was already working.
         """
         self.embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
-        self.embed_client = InferenceClient(api_key=os.environ["HF_TOKEN"])
+        self.embed_client = InferenceClient(api_key=_require_env("HF_TOKEN"))
 
         self.model = "llama-3.1-8b-instant"
         self.client = OpenAI(
-            api_key=api_key or os.environ["GROQ_API_KEY"],
+            api_key=api_key or _require_env("GROQ_API_KEY"),
             base_url="https://api.groq.com/openai/v1",
         )
 
