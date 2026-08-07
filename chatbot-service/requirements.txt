@@ -6,7 +6,7 @@ numpy
 scikit-learn
 pydantic
 pydantic-settings
-cors
+huggingface_hub
 python-multipart
 requests
 sentence-transformers
