@@ -10,6 +10,7 @@ Flask-Cors==4.0.1
 Werkzeug==3.0.3
 SQLAlchemy==2.0.31
 psycopg2-binary==2.9.9
+firebase-admin==6.5.0
 
 # ---- Chatbot service - FastAPI (chatbot-service/) ----
 fastapi
