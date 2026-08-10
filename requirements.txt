@@ -18,6 +18,7 @@ huggingface_hub
 numpy
 scikit-learn
 pydantic
+openai==1.51.0
 
 # ---- Shared ----
 python-dotenv
