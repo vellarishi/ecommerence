@@ -4,6 +4,8 @@ __pycache__/
 *.pyc
 .env
 .vscode/
-.claude/backend/firebase-key.json 
-backend/.env 
-backend/instance/ 
+.claude/backend/firebase-key.json
+backend/.env
+backend/instance/
+serviceAccountKey.json
+*firebase-adminsdk*.json 
