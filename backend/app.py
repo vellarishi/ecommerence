@@ -141,4 +141,4 @@ def _seed_initial_data(app):
 if __name__ == "__main__":
     app = create_app()
     port = int(os.environ.get("BACKEND_PORT", 5000))
-    app.run(debug=True, port=port)
+    app.run(debug=True, port=port)  

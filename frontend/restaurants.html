@@ -64,6 +64,7 @@
 
   <script>
     const API_BASE = "https://ecommerence-3lrk.onrender.com/api";
+
     const FALLBACK_IMAGES = {
       "South Indian": "https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop",
       "North Indian": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&h=400&fit=crop",
@@ -126,7 +127,7 @@
         filtered.map(r => `
           <div class="card">
             <div class="card-media">
-              <img src="${r.image}" alt="${r.name}" loading="lazy" onerror="handleImageError(this, '${r.cuisine}')">
+              <img src="${r.image_url}" alt="${r.name}" loading="lazy" onerror="handleImageError(this, '${r.cuisine}')">
               <button class="fav-btn" data-id="${r.id}" title="Add to favorites">♡</button>
             </div>
             <div class="card-body">
